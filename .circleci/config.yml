@@ -21,9 +21,33 @@ jobs:
       - run:
           name: Build release
           command: go build .
+      - save_cache:
+          key: go-mod-v4-{{ checksum "go.sum" }}
+          paths:
+            - '/home/circleci/go/pkg/mod'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - gogin-example
+            - Dockerfile
 
 workflows:
   build_and_push:
     jobs:
       - build-app:
           name: build-app
+      - aws-ecr/build-and-push-image:
+          requires:
+            - build-app
+          name: build-and-push-image
+          repo: sample-repo
+          tag: 'latest,v0.1.<<pipeline.number>>'
+          dockerfile: Dockerfile
+          attach-workspace: true
+          checkout: false
+          path: .
+          filters:
+            branches:
+              only: main
+          context:
+            - eu-central-1-ecr
