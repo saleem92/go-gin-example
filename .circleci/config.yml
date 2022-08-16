@@ -37,6 +37,8 @@ workflows:
       - build-app:
           name: build-app
       - aws-ecr/build-and-push-image:
+          context:
+            - aws-context
           requires:
             - build-app
           name: build-and-push-image
@@ -49,5 +51,3 @@ workflows:
           filters:
             branches:
               only: main
-          context:
-            - eu-central-1-ecr
